@@ -32,7 +32,7 @@ export function isValueQuery(encQ: EncodingQuery): encQ is ValueQuery {
 }
 
 export function isFieldQuery(encQ: EncodingQuery): encQ is FieldQuery {
-  return encQ !== null && encQ !== undefined && (encQ['field'] || 'autoCount' in encQ);
+  return encQ !== null && encQ !== undefined && (encQ['field'] || 'autoCount' in encQ || encQ['aggregate'] === 'count');
 }
 
 // TODO: split this into FieldDefQuery and AutoCountQuery
@@ -102,16 +102,16 @@ export function toFieldDef(fieldQ: FieldQuery,
  * Is a field query continuous field?
  * This method is applicable only for fieldQuery without wildcard
  */
-export function isContinuous(fieldQ: FieldQuery) {
-  return vlFieldDef.isContinuous(toFieldDef(fieldQ, ['bin', 'timeUnit', 'field', 'type']));
+export function isContinuous(encQ: EncodingQuery) {
+  return isFieldQuery(encQ) && vlFieldDef.isContinuous(toFieldDef(encQ, ['bin', 'timeUnit', 'field', 'type']));
 }
 
 /**
  * Is a field query discrete field?
  * This method is applicable only for fieldQuery without wildcard
  */
-export function isDiscrete(fieldQ: FieldQuery) {
-  return vlFieldDef.isDiscrete(toFieldDef(fieldQ, ['bin', 'timeUnit', 'field', 'type']));
+export function isDiscrete(encQ: EncodingQuery) {
+  return isFieldQuery(encQ) && vlFieldDef.isDiscrete(toFieldDef(encQ, ['bin', 'timeUnit', 'field', 'type']));
 }
 
 /**
@@ -122,9 +122,8 @@ export function isDiscrete(fieldQ: FieldQuery) {
 
 export function scaleType(fieldQ: FieldQuery) {
   const scale: ScaleQuery = fieldQ.scale === true || fieldQ.scale === SHORT_WILDCARD ? {} : fieldQ.scale || {};
-  const type = fieldQ.type;
-  const channel = fieldQ.channel;
-  const timeUnit = fieldQ.timeUnit;
+
+  const {type, channel, timeUnit, bin} = fieldQ;
 
   // HACK: All of markType, hasTopLevelSize, and scaleConfig only affect
   // sub-type of ordinal to quantitative scales (point or band)
@@ -136,7 +135,7 @@ export function scaleType(fieldQ: FieldQuery) {
   const hasTopLevelSize = false;
   const scaleConfig = {};
 
-  if (isWildcard(scale.type) || isWildcard(type) || isWildcard(channel) ) {
+  if (isWildcard(scale.type) || isWildcard(type) || isWildcard(channel) || isWildcard(bin)) {
     return undefined;
   }
 
@@ -164,8 +163,13 @@ export function scaleType(fieldQ: FieldQuery) {
     return undefined;
   }
 
+  // if type is fixed and it's not quantitative, we can ignore bin
+  if (type === 'quantitative' && isWildcard(bin)) {
+    return undefined;
+  }
+
   return compileScaleType(
-    scale.type, type, channel, timeUnit as TimeUnit, markType,
+    scale.type, channel, {type, timeUnit: timeUnit as TimeUnit, bin}, markType,
     hasTopLevelSize, rangeStep, scaleConfig
   );
 }
