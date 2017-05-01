@@ -14,6 +14,8 @@ export interface FieldSchema {
   field: string;
   type?: Type;
 
+  isIdLike?: boolean;
+
   /** number, integer, string, date  */
   primitiveType: PrimitiveType;
 
@@ -81,9 +83,12 @@ export function build(data: any, opt: QueryConfig = {}): Schema {
       type = Type.NOMINAL;
     }
 
+    let isIdLike = (type === Type.NOMINAL && distinct / fieldProfile.count < .8);
+
     return {
       field: field,
       type: type,
+      isIdLike: isIdLike,
       primitiveType: primitiveType,
       stats: fieldProfile,
       timeStats: {} as {[timeUnit: string]: DLFieldProfile},
