@@ -90,7 +90,6 @@ export function build(data: any, opt: QueryConfig = {}): Schema {
     return {
       field: field,
       type: type,
-      isIdLike: isIdLike,
       primitiveType: primitiveType,
       stats: fieldProfile,
       timeStats: {} as {[timeUnit: string]: DLFieldProfile},
