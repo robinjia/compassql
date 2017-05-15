@@ -7,14 +7,13 @@ import {inferAll} from 'datalib/src/import/type';
 import * as dlBin from 'datalib/src/bins/bins';
 
 import {BinQuery, EncodingQuery, FieldQuery} from './query/encoding';
+import {ExpandedType} from './query/ExpandedType'
 import {QueryConfig, DEFAULT_QUERY_CONFIG} from './config';
 import {cmp, extend, keys} from './util';
 
 export interface FieldSchema {
   field: string;
-  type?: Type;
-
-  isIdLike?: boolean;
+  type?: ExpandedType;
 
   /** number, integer, string, date  */
   primitiveType: PrimitiveType;
@@ -53,7 +52,7 @@ export function build(data: any, opt: QueryConfig = {}): Schema {
     let field: string = fieldProfile.field;
     let primitiveType: PrimitiveType = types[field] as any;
     let distinct: number = fieldProfile.distinct;
-    let type: Type;
+    let type: ExpandedType;
 
     if (primitiveType === PrimitiveType.NUMBER) {
       type = Type.QUANTITATIVE;
@@ -83,7 +82,10 @@ export function build(data: any, opt: QueryConfig = {}): Schema {
       type = Type.NOMINAL;
     }
 
-    let isIdLike = (type === Type.NOMINAL && distinct / fieldProfile.count < .8);
+    let isIdLike = (type === Type.NOMINAL && distinct / fieldProfile.count > .8);
+    if (isIdLike) {
+      type = ExpandedType.KEY;
+    }
 
     return {
       field: field,
@@ -99,9 +101,10 @@ export function build(data: any, opt: QueryConfig = {}): Schema {
   // order the fieldSchemas (sort them)
   const order = {
     'nominal': 0,
-    'ordinal': 1,
-    'temporal': 2,
-    'quantitative': 3
+    'key': 1,
+    'ordinal': 2,
+    'temporal': 3,
+    'quantitative': 4
   };
   fieldSchemas.sort(function(a: FieldSchema, b: FieldSchema) {
     // first order by type: nominal < temporal < quantitative < ordinal
