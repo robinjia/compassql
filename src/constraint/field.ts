@@ -290,19 +290,7 @@ export const FIELD_CONSTRAINTS: EncodingConstraintModel<FieldQuery>[] = [
       }
       return true; // other channel is irrelevant to this constraint
     }
-  },
-  /*{
-    name: 'highCardinalityNomialFieldsShouldBeExcluded',
-    description: 'Exclude Nomial Fields with High Cardinality',
-    properties: [Property.FIELD, Property.TYPE],
-    allowWildcardForProperties: false,
-    strict: true,
-    satisfy: (fieldQ: FieldQuery, schema: Schema, __: PropIndex<Wildcard<any>>, ___: QueryConfig) => {
-      let fieldSchema = schema.fieldSchema(fieldQ.field as string);
-      return true;
-    }
-  }*/
-  ,{
+  },{
     name: 'dataTypeAndFunctionMatchScaleType',
     description: 'Scale type must match data type',
     properties: [Property.TYPE, Property.SCALE, getEncodingNestedProp('scale', 'type'), Property.TIMEUNIT, Property.BIN],

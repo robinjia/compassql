@@ -69,7 +69,7 @@ describe('schema', () => {
 
     it('should return the correct type of measurement for each field', () => {
       assert.equal(schema.type('a'), Type.QUANTITATIVE);
-      assert.equal(schema.type('b'), ExpandedType.KEY);
+      assert.equal(schema.type('b'), Type.NOMINAL);
       assert.equal(schema.type('c'), Type.QUANTITATIVE);
       assert.equal(schema.type('d'), Type.TEMPORAL);
     });

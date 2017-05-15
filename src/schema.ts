@@ -82,7 +82,7 @@ export function build(data: any, opt: QueryConfig = {}): Schema {
       type = Type.NOMINAL;
     }
 
-    let isIdLike = (type === Type.NOMINAL && distinct / fieldProfile.count > .8);
+    let isIdLike = (type === Type.NOMINAL && distinct / fieldProfile.count > .8 && fieldProfile.count > 50);
     if (isIdLike) {
       type = ExpandedType.KEY;
     }
