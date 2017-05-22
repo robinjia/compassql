@@ -83,8 +83,8 @@ export function build(data: any, opt: QueryConfig = {}): Schema {
     }
 
     if (type === Type.NOMINAL 
-      && distinct / fieldProfile.count > DEFAULT_QUERY_CONFIG.percentUnique
-      && fieldProfile.count > DEFAULT_QUERY_CONFIG.minimumKeys) {
+      && distinct / fieldProfile.count > DEFAULT_QUERY_CONFIG.minPercentUniqueForKey
+      && fieldProfile.count > DEFAULT_QUERY_CONFIG.minCardinalityForKey) {
       type = ExpandedType.KEY;
     }
 
